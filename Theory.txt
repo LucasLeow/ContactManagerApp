@@ -70,17 +70,41 @@ mycontacts-backend
 		
 General Overview of steps
 1) server.js, app.listen for initial testing of server run
+
 2) Set up routes
 	- create routes dir
 	- create contactRoutes.js
 	- since all endpoint have same url, use route.route("/")
 	- then within server.js, use app.use("/api/contacts") : the common path
 	- set up Get Put Post Delete as required
+	
 3) Set up Controller (logic for request responses, connect to DB etc.)
 	- create controller dir
 	- create contactController.js
+		- Whenever create API methods, must always give label
+		
 		
 
 
-		
+
+Interaction with DB
+- Whenever interaction with MongoDB, always receive a promise
+- Therefore, Async JS should be used
+
+
+
+Middleware:
+
+	- Express Async handler
+		- to handle async exceptions
+		- pass exception to errorHandle file that is already defined
+	npm i express-async-handler
 	
+	
+	inside API Controller:
+		 
+	const asyncHandler = require("express-async-handler")
+
+	const getContacts = asyncHandler( async (req, res) => {
+		res.status(200).json({message: "Get all contacts"});
+	})
