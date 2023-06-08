@@ -1,0 +1,184 @@
+-- INITIAL SKELETON SETUP --
+
+	- Valid for any projects using Express
+	- May have to install different dependencies based on use case / requirements
+
+	1) Create Project Directory 
+	2) Create Directory: project-backend
+	3) cd into project-backend, npm init
+				{
+			  "name": "project-backend",
+			  "version": "1.0.0",
+			  "description": "backend api files",
+			  "main": "server.js",
+			  "scripts": {
+				"test": "echo \"Error: no test specified\" && exit 1"
+			  },
+			  "author": "lucas",
+			  "license": "MIT"
+			}
+
+	4) create server.js (entry point, may be named index.js / app.js in other projects)
+	5) npm install express
+	6) npm i -D nodemon
+	7) Open package.json, edit scripts key
+		- "start": "node server.js",
+		- "dev": "nodemon server.js"
+		
+	8) npm i dotenv (to handle .env packages to fetch PORT)
+	9) create .env file
+		- PORT=5001 (no semi-colons)
+		- CONNECTION_STRING = <mongoDB Connection String> here later> (Dont need add at this point)
+		
+	10) Set up express in server.js
+	
+			```
+			
+			const express = require("express");
+			const dotenv = require("dotenv").config();
+			
+			const app = express();
+			const port = process.env.port;
+			
+			app.use(express.json()) // built-in middleware json parser
+			
+			app.listen(port, () => {
+				console.log(`Server is running on ${port}`);
+			})
+			
+			```
+	11) npm run dev (to test skeleton server running properly)
+		- should see console log msg
+	
+
+-- ROUTES (API) SETUP --
+
+	- Routes may differ from project to project
+	- Think about path before setting up
+	- Routes in this project:
+	- Utilize Express Router Class
+		
+		- Get all contacts - GET - /api/contacts
+		- Get contact - GET - /api/contacts/:id
+		- Create contact - POST - /api/contacts
+		- Update contact - PUT - /api/contacts/:id
+		- Delete contact - DELETE - /api/contacts/:id
+		
+	1) create "routes" directory
+	2) create contactRoutes.js (may name other as desired)
+		```
+		const express = require("express");
+		const router = express.Router();
+		
+		** MOST BASIC IMPLEMENTATION, CAN ABSTRACT ACTIONS TO CONTROLLERS DIR **
+		** SEE BELOW FOR CONTROLLER IMPLEMENTATION **
+		
+				router.get('/', (req, res) => {
+					res.json({"message":"Get all contact"});
+				});
+				
+				router.get('/:id', (req, res) => {
+					res.json({"message": "Get single contact"});
+				});
+				
+				router.post('/', (req, res) => {
+					res.json({"message":"Create new contact"});
+				});
+				
+				router.put('/:id', (req, res) => {
+					res.json({"message":"update contact"});
+				});
+				
+				router.delete('/:id', (req, res) => {
+					res.json({"message":"Delete desired contact"});
+				});
+				
+				module.exports = router;
+		```
+	
+	3) Inside server.js:
+		```
+		const routers = require("./routes/contactRoutes");
+		
+		// middleware fn mounted on specified path
+		// 
+		app.use('/api/contacts', routers);
+		```
+		
+	** CONTROLLER IMPLEMENTATION FOR ROUTER ACTIONS **
+		
+	4) create "controllers" directory
+		- to put router actions 
+		
+	5) create contactController.js
+		- must include labels (description) for each action
+		
+			```
+			
+			//@desc Get all contacts
+			//@route GET /api/contacts
+			//@access public
+			const getContacts = (req, res) => {
+				res.json({"message":"Get all contact"});
+			};
+			
+			//@desc Get single contact
+			//@route GET /api/contacts/:id
+			//@access public
+			const getContact = (req, res) => {
+				res.json({"message": "Get single contact"});
+			};
+			
+			//@desc Create new contact
+			//@route POST /api/contacts/:id
+			//@access public
+			const createContact = (req, res) => {
+				res.json({"message":"Create new contact"});
+			};
+			
+			//@desc update existing contact
+			//@route PUT /api/contacts/:id
+			//@access public
+			const updateContact = (req, res) => {
+				res.json({"message":"update contact"});
+			};
+			
+			//@desc Delete contact
+			//@route DELETE /api/contacts/:id
+			//@access public
+			const deleteContact = (req, res) => {
+				res.json({"message":"Delete desired contact"});
+			};
+			
+			module.exports = {
+				getContacts,
+				getContact,
+				createContact,
+				updateContact,
+				deleteContact
+			}
+		
+			```
+			
+	6) Go back to contactRoutes.js
+	
+		** FINALIZED VERSION OF contactRoutes.js **
+	
+		```
+		const express = require("express");
+		const router = express.Router();
+		const { getContacts, getContact, createContact, updateContact, deleteContact } = require('../controllers/contactController');
+		
+				router
+				.get('/', getContacts)
+				.post('/', createContact)
+				
+				router
+				.get('/:id', getContact)
+				.put('/:id', updateContact)
+				.delete('/:id', deleteContact)
+
+				module.exports = router;
+	
+		```
+		

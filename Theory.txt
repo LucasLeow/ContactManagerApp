@@ -108,3 +108,13 @@ Middleware:
 	const getContacts = asyncHandler( async (req, res) => {
 		res.status(200).json({message: "Get all contacts"});
 	})
+	
+	- Async Handler middleware will handle async functions with try catch block
+	- thus, no need to manually write try catch block
+	
+	
+Mongoose:
+	- object model design schema
+	- help with communicating with mongoDB 
+	
+	npm i mongoose
