@@ -7,7 +7,7 @@ Content
 
 1) Express Project Setup
 2) Create Express Server
-3) Thunder Client Setup (API Testing)
+3) Thunder Client Setup (API Testing built within VSCode)
 4) Express Router Setup (Routes)
 5) Error Handling, Async Handler
 6) Express Middleware
@@ -62,3 +62,25 @@ mycontacts-backend
 		4) inside package.json - scripts:
 			- "start": "node server.js",
 			- "dev": "nodemon server.js"
+			
+		5) npm i dotenv (to handle .env packages to fetch PORT)
+			- built on node process module
+	
+		
+		
+General Overview of steps
+1) server.js, app.listen for initial testing of server run
+2) Set up routes
+	- create routes dir
+	- create contactRoutes.js
+	- since all endpoint have same url, use route.route("/")
+	- then within server.js, use app.use("/api/contacts") : the common path
+	- set up Get Put Post Delete as required
+3) Set up Controller (logic for request responses, connect to DB etc.)
+	- create controller dir
+	- create contactController.js
+		
+
+
+		
+	
