@@ -1,0 +1,42 @@
+Title: Learn Node.js & Express with Project in 2 Hours
+Link: https://www.youtube.com/watch?v=H9M02of22z4
+Youtube
+
+
+Content
+
+1) Express Project Setup
+2) Create Express Server
+3) Thunder Client Setup (API Testing)
+4) Express Router Setup (Routes)
+5) Error Handling, Async Handler
+6) Express Middleware
+7) MongoDB Setup
+8) Mongoose Schema (Communicate with DB)
+9) CRUD API
+10) User Authentication
+11) Registration & Login API (Endpoints)
+12) Controllers & DB Operations (Communicate with DB for different operations)
+13) Password Hashing & Comparing
+14) Sign / Verify JWT Token (JSON Web Token) (Authentication)
+15) Handle r/s using Mongoose Schema for different documents
+16) Protected Routes (Only authenticated users can access routes)
+17) User Authorization (Only authorized user can access endpoints)
+18) API Testing
+
+
+Contact Manager Application
+
+
+REST API Convention:
+	- GET | PUT | POST | DELETE
+	
+	CRUD actions in project
+	
+		Crud Action - HTTP Method - Endpoints
+		
+		- Get all contacts - GET - /api/contacts
+		- Get contact - GET - /api/contacts/:id
+		- Create contact - POST - /api/contacts
+		- Update contact - PUT - /api/contacts/:id
+		- Delete contact - DELETE - /api/contacts/:id
