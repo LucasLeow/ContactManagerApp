@@ -119,35 +119,35 @@
 			//@route GET /api/contacts
 			//@access public
 			const getContacts = (req, res) => {
-				res.json({"message":"Get all contact"});
+				res.status(200).json({"message":"Get all contact"});
 			};
 			
 			//@desc Get single contact
 			//@route GET /api/contacts/:id
 			//@access public
 			const getContact = (req, res) => {
-				res.json({"message": "Get single contact"});
+				res.status(200).json({"message": "Get single contact"});
 			};
 			
 			//@desc Create new contact
 			//@route POST /api/contacts/:id
 			//@access public
 			const createContact = (req, res) => {
-				res.json({"message":"Create new contact"});
+				res.status(201).json({"message":"Create new contact"});
 			};
 			
 			//@desc update existing contact
 			//@route PUT /api/contacts/:id
 			//@access public
 			const updateContact = (req, res) => {
-				res.json({"message":"update contact"});
+				res.status(200).json({"message":"update contact"});
 			};
 			
 			//@desc Delete contact
 			//@route DELETE /api/contacts/:id
 			//@access public
 			const deleteContact = (req, res) => {
-				res.json({"message":"Delete desired contact"});
+				res.status(200).json({"message":"Delete desired contact"});
 			};
 			
 			module.exports = {
@@ -180,5 +180,232 @@
 
 				module.exports = router;
 	
+		```
+		
+-- ERROR HANDLING --
+
+	- When receiving data (such as user details for POSTING)
+		- sometimes, data incorrect format
+		- want to check for these error
+		
+	1) Go to contactController.js
+	
+			```
+			
+			const createContact = (req, res) => {
+			
+				const { name, email, phone } = req.body;
+				if (!name || !email || !phone) {
+					res.status(400);
+					throw new Error("All fields mandatory");
+				}
+				res.status(201).json({"message":"Create new contact"});
+			};
+	
+			```
+	
+	2) Create custom middleware to convert HTML error message to JSON error message
+		- create "middleware" dir
+		
+	3) Create errorHandler.js inside "middleware" dir
+	
+		** NOT THE FINAL CODE FOR custom errorHandler. Just for initial testing **
+			- Test for JSON error message
+			- Test for correct error message + statusCode parsed
+			- See below for full implementation of Custom Error
+	
+		```
+		
+		const errorHandler = (err, req, res, next) => {
+			const statusCode = res.statusCode ? res.statusCode : 500;
+			res.json({message: err.message, stackTrace: err.stack});
+		
+		module.exports = errorHandler;
+		
+		```
+	
+	5) Go to server.js:
+		
+		add the following to the respective sections:
+		
+		const errorHandler = require("./middleware/errorhandler");
+		
+		
+		app.use(errorHandler);
+ 	
+	6) Create new file : errorCodes.js
+	
+		```
+		exports.constants = {
+			VALIDATION_ERROR: 400,
+			UNAUTHORIZED: 401,
+			FORBIDDEN:403,
+			NOT_FOUND: 404
+		};
+		
+		```
+	7) Go back to errorHandler.js
+	
+	```
+		const { errorCodes } = require("../errorCodes"); // path may differ depending on location
+
+		const errorHandler = (err, req, res, next) => {
+			const statusCode = res.statusCode ? res.statusCode : 500;
+			switch(statusCode) {
+				case errorCodes.VALIDATION_ERROR:
+					res.json({type:"Validation failed", message: err.message, stackTrace: err.stack});
+					break;
+				case errorCodes.UNAUTHORIZED:
+					res.json({type:"Unauthorized", message: err.message, stackTrace: err.stack});
+					break;
+				case errorCodes.FORBIDDEN:
+					res.json({type:"Forbidden", message: err.message, stackTrace: err.stack});
+					break;
+				case errorCodes.NOT_FOUND:
+					res.json({type:"Not Found", message: err.message, stackTrace: err.stack});
+					break;
+				case errorCodes.SERVER_ERROR:
+					res.json({type:"Server Error", message: err.message, stackTrace: err.stack});
+					break;
+				default:
+					console.log("No error. ")
+					break;
+			}
+		}
+
+		module.exports = errorHandler;
+	 
+	 ```
+	 
+	 
+
+-- Add Async JS to Controller --
+	- When interacting with MongoDB, return is a promise
+	- To resolve promise, need to use Async JS 
+		- adding async to all functions
+		- when adding async, need to implement try catch block to handle errors for async fn
+		- utilize Express built-in Async exception handler
+	
+	
+	1) npm i express-async-handler
+	
+	2) Go to contactController.js
+		const asyncHandler = require("express-async-handler");
+		
+	3) Add async keyword to all arrow functions inside controller
+	
+	4) Wrap the async function within asyncHandler
+	
+		```
+		
+		const asyncHandler = require("express-async-handler");
+            //@desc Get all contacts
+			//@route GET /api/contacts
+			//@access public
+			const getContacts = asyncHandler( async (req, res) => {
+				res.status(200).json({"message":"Get all contact"});
+			});			
+			//@desc Get single contact
+			//@route GET /api/contacts/:id
+			//@access public
+			const getContact = asyncHandler(async (req, res) => {
+				res.status(200).json({"message": "Get single contact"});
+			});
+			
+			//@desc Create new contact
+			//@route POST /api/contacts/:id
+			//@access public
+			const createContact = asyncHandler(async (req, res) => {
+                console.log(req.body)
+                const { name, email, mobile } = req.body;
+                if (!name || !email || !mobile) {
+                    res.status(400);
+                    throw new Error("All fields Mandatory");
+                }
+				res.status(201).json({"message":"Create new contact"});
+			});
+			
+			//@desc update existing contact
+			//@route PUT /api/contacts/:id
+			//@access public
+			const updateContact = asyncHandler(async (req, res) => {
+				res.status(200).json({"message":"update contact"});
+			});
+			
+			//@desc Delete contact
+			//@route DELETE /api/contacts/:id
+			//@access public
+			const deleteContact = asyncHandler(async (req, res) => {
+				res.status(200).json({"message":"Delete desired contact"});
+			});
+			
+			module.exports = {
+				getContacts,
+				getContact,
+				createContact,
+				updateContact,
+				deleteContact
+			}
+			
+		```
+		
+
+-- Setting up MongoDB with Express --
+
+	Collections : Where data is stored as JSON in MongoDB
+
+	1) Go to MongoDB and login
+	2) Select "Shared" Cluster (Free)
+		- Choose Region (Singapore)
+	3) Change cluster name to lucascluster then create Cluster
+	4) Security Quickstart:
+		user: admin
+		pw: <as_desired>
+		- connect from local env
+		- add current IP Address
+		Finish & Close
+		- Wait for Cluster Creation (will take some time)
+	5) click on created cluster & "Add my own Data"
+	6) DB name : mycontacts-backend | Collections name: contacts
+	7) Go to VSCode extension : download MongoDB for VS Code
+	8) Go back to MongoDB lucascluster page -> overview
+		- click on Connect (right corner) & select MongoDB for VScode
+	9) Copy the connection string & add connection in VSCode 
+		mongodb+srv://admin:<password>@lucascluster.hr7yd6q.mongodb.net/
+		* Replace password with own pw, remove the <> symbol
+	10) Go back to MongoDB -> Connect -> Drivers -> Select Node.js
+		- copy the connection string
+	11) Go to .env 
+		```
+		
+		** REPLACE <PASSWORD> WITH OWN PASSWORD, REMOVE <> **
+		
+		CONNECTION_STRING = "mongodb+srv://admin:<password>@lucascluster.hr7yd6q.mongodb.net/mycontacts-backend?retryWrites=true&w=majority"
+		```
+		
+	12) Create "config" dir in project
+		- to connect with MongoDB on express, can use mongoose module
+		- Mongoose : Object Data Model Design Schema
+	
+	13) Create dbConnection.js inside config dir
+	14) npm i mongoose
+	15) inside dbConnection.js:
+		```
+		const mongoose = require("mongoose");
+		
+		const connectDB = async () => {
+			try {
+				const connect = await mongoose.connect(process.env.CONNECTION_STRING);
+				console.log("Database connected successfully",
+				connect.connection.host,
+				connect.connection.name);
+				
+			} catch (err) {
+				console.log(err);
+				process.exit(1);
+			}
+		}
+		
+		module.exports = connectDB;
 		```
 		
