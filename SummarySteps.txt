@@ -422,6 +422,7 @@
 	17) Check that Database connected successfully logged in console
 	
 -- Creating Schema for Project (Contacts) --
+(Linking Express to MongoDB via Mongoose ODM)
 
 	1) Create new folder called "models"
 	2) create "contactModel.js" file inside models
@@ -450,5 +451,191 @@
 	3) go to contactController.js (API Actions)
 	
 		```
+		
 		const Contact = require("../models/contactModel");
+		const asyncHandler = require("express-async-handler");
+		//@desc Get all contacts
+		//@route GET /api/contacts
+		//@access public 
+		const getContacts=asyncHandler(async (req, res) => {
+			const contacts = await Contact.find();
+			res.status(200).json(contacts);
+		})
+		//@desc Get desired contact
+		//@route GET /api/contacts/:id
+		//@access public 
+		const getContact= asyncHandler(async (req, res) => {
+			const contact = await Contact.findById(req.params.id);
+			if (!contact) {
+				res.status(404);
+				throw new Error("Contact not found");
+			}
+			res.status(200).json(contact);
+		})
+
+		//@desc Create new contact
+		//@route POST /api/contacts
+		//@access public 
+		const createContact= asyncHandler(async (req, res) => {
+			console.log(req.body);
+			const { name, email, phone } = req.body; 
+			if (!name || !email || !phone) {
+				res.status(400);
+				throw new Error("All fields are required");
+			}
+			const contact = await Contact.create({
+				name:name,
+				email:email,
+				phone:phone
+			});
+			res.status(201).json(contact);
+		})
+
+		//@desc Update  existing contact
+		//@route PUT /api/contacts/:id
+		//@access public 
+		const updateContact= asyncHandler(async (req, res) => {
+			const contact = await Contact.findById(req.params.id);
+			if (!contact) {
+				res.status(404);
+				throw new Error("Contact not found, update fail");
+			}
+			const updatedContact = await Contact.findByIdAndUpdate(
+				req.params.id,
+				req.body,
+				{new: true}
+				);
+			res.status(200).json(updatedContact);
+		})
+
+		//@desc delete  existing contact
+		//@route DELETE /api/contacts/:id
+		//@access public 
+		const deleteContact= asyncHandler(async (req, res) => {
+			const contact = await Contact.findById(req.params.id);
+			if(!contact) {
+				res.status(404);
+				throw new Error("Contact not found");
+			}
+			await Contact.findByIdAndRemove(req.params.id);
+			res.status(200).json(contact);
+		});
+
+		module.exports={
+			getContacts,
+			getContact,
+			createContact,
+			updateContact,
+			deleteContact
+		};
+		
 		```
+
+
+-- User Authentication (Registration, Login) --
+
+	1) Go to server.js
+	
+	add:
+		app.use('/api/users', require("./routes/userRoutes"));
+		
+		// For user registration & login
+		
+	2) Go to routes dir, create userRoutes.js
+	
+		** NOT THE FINAL STATE OF userRoutes.js (Will be adding actions to userController.js)
+		- Similar concept to contactController.js & contactRoutes.js
+	
+		```
+		const express = require("express");
+		const router = express.Router();
+
+		router.post("/register", (req, res) => {
+			res.json({message: "Register User"});
+		})
+
+		router.post("/login", (req, res) => {
+			res.json({message: "Login User"});
+		})
+
+		// gives info. about current user
+		router.get("/current", (req, res) => {
+			res.json({message: "Current User Information"});
+		})
+
+		module.exports = router;
+		```
+		
+	3) Go to "controllers" dir & create userController.js
+	
+		```
+		const asyncHandler = require("express-async-handler");
+		//@desc Register User
+		//@route POST /api/users/register
+		//@access public 
+		const registerUser = asyncHandler(async (req, res) => {
+			res.json({message: "Register User"});
+		});
+
+		//@desc User  Login
+		//@route POST /api/users/login
+		//@access public 
+		const loginUser = asyncHandler(async (req, res) => {
+			res.json({message: "Login User"});
+		});
+
+		//@desc Current User info 
+		//@route POST /api/users/current
+		//@access private 
+		const currentUser = asyncHandler(async (req, res) => {
+			res.json({message: "Current User Information"});
+		});
+
+		module.exports = { registerUser, loginUser, currentUser };
+		```
+	4) Go back to userRoutes.js
+	
+		```
+		const express = require("express");
+		const router = express.Router();
+		const { registerUser, loginUser, currentUser } = require("../controllers/userController");
+
+		router.post("/register", registerUser);
+		router.post("/login", loginUser);
+
+		// gives info. about current user
+		router.get("/current", currentUser);
+
+		module.exports = router;
+
+		```
+		
+-- Creating Schema for Users --
+
+	1) Go to "models" dir, create "userModel.js"
+	
+		```
+		const mongoose = require("mongoose");
+
+		const userSchema = mongoose.Schema({
+			username : {
+				type: String,
+				required : [true, "Please add username"]
+			},
+			email : {
+				type: String,
+				required : [true, "Please add email"],
+				unique: [true, "Email already taken!"] // allow only single use of email
+			},
+			password : {
+				type: String,
+				required : [true, "Please add password"]
+			}
+		}, {
+			timestamps : true
+		});
+
+		module.exports = mongoose.model("User", userSchema);
+		```
+		
+	2) Go to userController.js to link Schema to API actions

@@ -9,7 +9,9 @@ const port = process.env.port;
 
 // provides parser to parse json from data stream
 app.use(express.json()) //Express built-in middleware to parse json requests
+
 app.use('/api/contacts', require("./routes/contactRoutes"));
+app.use('/api/users', require("./routes/userRoutes"));
 app.use(errorHandler);
 
 app.listen(port, ()=>{
