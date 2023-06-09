@@ -407,5 +407,48 @@
 		}
 		
 		module.exports = connectDB;
+		``
+		
+	16) Go to server.js
+	
+		```
+		const connectDb = require("./config/dbConnection");
+		
+		connectDb();
+		const app = express();
+		const port = process.env.port;
 		```
 		
+	17) Check that Database connected successfully logged in console
+	
+-- Creating Schema for Project (Contacts) --
+
+	1) Create new folder called "models"
+	2) create "contactModel.js" file inside models
+		```
+		const mongoose = require("mongoose");
+		
+		const contactSchema = mongoose.Schema({
+			name : {
+				type: String,
+				required : [true, "Please add contact name"]
+			},
+			email : {
+				type: String,
+				required : [true, "Please add contact email"]
+			},
+			phone : {
+				type: String,
+				required : [true, "Please add contact phone number"]
+			}
+		}, {
+			timestamps : true
+		});
+		
+		module.exports = mongoose.model("Contact", contactSchema);
+		```
+	3) go to contactController.js (API Actions)
+	
+		```
+		const Contact = require("../models/contactModel");
+		```
